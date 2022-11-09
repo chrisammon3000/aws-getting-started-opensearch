@@ -1,20 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Opensearch Tutorial
 
-
 Parameters:
-  Stage:
-    Type: String
-    Description: Stage of production
   AppName:
     Type: String
   MoviesMasterUserName:
     Type: String
-    Default: admin
   MoviesMasterUserPassword:
     Type: String
-    Default: Pa55word!
     NoEcho: true
+  IamUserName:
+    Type: String
 
 Resources:
   OpenSearchKey:
@@ -35,7 +31,7 @@ Resources:
           - Sid: KMSKeyAdmin
             Effect: Allow
             Principal:
-              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:user/Glindsey'
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${IamUserName}'
             Action:
               - 'kms:Create*'
               - 'kms:Describe*'
@@ -79,7 +75,7 @@ Resources:
         KmsKeyId: !GetAtt OpenSearchKey.Arn
       DomainEndpointOptions:
         EnforceHTTPS: true
-      AccessPolicies: # required for open access using fine-grained access
+      AccessPolicies: # required for open access using fine-grained access (AdvancedSecurityOptions)
         Version: '2012-10-17'
         Statement:
           - Effect: 'Allow'
@@ -87,37 +83,6 @@ Resources:
               AWS: '*'
             Action: 'es:*'
             Resource: !Sub 'arn:${AWS::Partition}:es:${AWS::Region}:${AWS::AccountId}:domain/${AppName}-movies/*'
-      #   Version: '2012-10-17'
-      #   Statement:
-      #     - Effect: 'Allow'
-      #       Principal:
-      #         AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:user/Glindsey'
-      #       Action: 'es:*'
-      #       Resource: !Sub 'arn:${AWS::Partition}:es:${AWS::Region}:${AWS::AccountId}:domain/test/*'
-      # LogPublishingOptions:
-      #   ES_APPLICATION_LOGS:
-      #       CloudWatchLogsLogGroupArn: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/opensearch/domains/opensearch-application-logs'
-      #       Enabled: true
-      #   SEARCH_SLOW_LOGS:
-      #       CloudWatchLogsLogGroupArn: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/opensearch/domains/opensearch-slow-logs'
-      #       Enabled: true
-      #   INDEX_SLOW_LOGS:
-      #       CloudWatchLogsLogGroupArn: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/opensearch/domains/opensearch-index-slow-logs'
-      #       Enabled: true
       AdvancedOptions:
-        rest.action.multi.allow_explicit_index: true
-        override_main_response_version: true
-
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Principal": {
-#         "AWS": "*"
-#       },
-#       "Action": "es:*",
-#       "Resource": "arn:aws:es:us-east-1:763675941034:domain/opensearch-tutorial-movies/*"
-#     }
-#   ]
-# }
+        rest.action.multi.allow_explicit_index: "true"
+        # override_main_response_version: "true"

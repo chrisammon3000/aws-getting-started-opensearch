@@ -1,5 +1,4 @@
 SERVICE := analytics
-# EC2_KEY_PAIR_NAME := $${STAGE}-$${APP_NAME}-$${AWS_REGION}-aws-devops-key
 
 target:
 	$(info ${HELP_MESSAGE})
@@ -9,7 +8,6 @@ deploy:
 	@echo "$$(gdate -u +'%Y-%m-%d %H:%M:%S.%3N') - Deploying ${SERVICE} service"
 	$(MAKE) service.deploy
 
-# TODO test AWSCLI output and validate the stack was created successfully
 service.deploy:
 	@echo "$$(gdate -u +'%Y-%m-%d %H:%M:%S.%3N') - Deploying CloudFormation"
 	@aws cloudformation deploy \
@@ -19,16 +17,13 @@ service.deploy:
 		--capabilities CAPABILITY_IAM \
 		--tags stage="$${STAGE}" app="$${APP_NAME}" \
 		--parameter-overrides \
-			Stage="$${STAGE}" \
 			AppName="$${APP_NAME}" \
-			DataBucketName="$${DATA_BUCKET_NAME}"
+			MoviesMasterUserName="$${MASTER_USER}" \
+			MoviesMasterUserPassword="$${MASTER_PASSWORD}" \
+			IamUserName="$${IAM_USERNAME}"
 
 delete: ##=> Delete resources
 	@echo "$$(gdate -u +'%Y-%m-%d %H:%M:%S.%3N') - Deleting ${SERVICE} service"
-ifeq ($(data),true)
-	@echo "$$(gdate -u +'%Y-%m-%d %H:%M:%S.%3N') - Deleting data in $$DATA_BUCKET_NAME"
-	@aws s3 rm --recursive s3://$$DATA_BUCKET_NAME/
-endif
 	$(MAKE) service.delete
 
 service.delete:
