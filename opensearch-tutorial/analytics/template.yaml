@@ -79,7 +79,14 @@ Resources:
         KmsKeyId: !GetAtt OpenSearchKey.Arn
       DomainEndpointOptions:
         EnforceHTTPS: true
-      # AccessPolicies:
+      AccessPolicies: # required for open access using fine-grained access
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              AWS: '*'
+            Action: 'es:*'
+            Resource: !Sub 'arn:${AWS::Partition}:es:${AWS::Region}:${AWS::AccountId}:domain/${AppName}-movies/*'
       #   Version: '2012-10-17'
       #   Statement:
       #     - Effect: 'Allow'
@@ -100,3 +107,17 @@ Resources:
       AdvancedOptions:
         rest.action.multi.allow_explicit_index: true
         override_main_response_version: true
+
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Principal": {
+#         "AWS": "*"
+#       },
+#       "Action": "es:*",
+#       "Resource": "arn:aws:es:us-east-1:763675941034:domain/opensearch-tutorial-movies/*"
+#     }
+#   ]
+# }
